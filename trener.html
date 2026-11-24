@@ -1,4 +1,9 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Соревновательная подготовка</title>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="4a4b9acd-3a90-4570-80c1-6168527479ba" data-domains="leodikadyrov.github.io"></script>
 <!-- Лендинг v2, 01.10.2026. Источники: PRACTICE-PLAN-Q4.md §1, usloviya-raboty-v6.docx. Предыдущая версия — deprecated/page.html (устарела 12.10.2026). -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -221,7 +226,7 @@ footer p{max-width:var(--read)}
   <p>Хочешь узнать, совпадает ли тест с тем, как ты играешь на самом деле? Пришли результат теста и одну демку. В течение 3 дней напишу, подтверждает ли запись твои две главные шкалы. Бесплатно, один раз на человека.</p>
   <p class="note">Без регистрации, ответы остаются в твоём браузере, пока ты сам не отправишь их мне. Это не диагноз.</p>
   <div class="cta-row" style="margin-top:24px">
-    <a class="cta" href="test.html">Пройти тест</a>
+    <a class="cta" id="testLink" data-umami-event="test-click" href="test.html">Пройти тест</a>
   </div>
 </section>
 
@@ -350,8 +355,8 @@ footer p{max-width:var(--read)}
   <p>Напиши, во что играешь, ник и пару слов о том, что не так. Предложу время, а до первой встречи пришлю условия работы и политику обработки данных.</p>
   <p class="note">Все документы, которые подписываются, можно прочитать заранее: условия работы, политика обработки персональных данных, приложение для игроков 16–18 лет — <a href="https://drive.google.com/drive/folders/1MJNbpNoovphljDnoHJvJkzvzpEx7ibln?usp=sharing">папка на Google Диске</a>.</p>
   <div class="cta-row">
-    <a class="cta" href="https://t.me/puchar">Написать в Telegram</a>
-    <a class="cta-alt" href="https://wa.me/79234159992">или WhatsApp</a>
+    <a class="cta" data-umami-event="contact" data-umami-event-channel="tg" data-umami-event-page="landing" href="https://t.me/puchar">Написать в Telegram</a>
+    <a class="cta-alt" data-umami-event="contact" data-umami-event-channel="wa" data-umami-event-page="landing" href="https://wa.me/79234159992">или WhatsApp</a>
   </div>
   <p class="note" style="margin-top:14px">Telegram: <b>@puchar</b> · WhatsApp: <b>+7 923 415-99-92</b></p>
 </section>
@@ -470,3 +475,4 @@ footer p{max-width:var(--read)}
   show(0);
 })();
 </script>
+<script>(function(){var q=location.search,a=document.getElementById("testLink");if(q&&a)a.href="test.html"+q;})();</script>

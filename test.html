@@ -1,4 +1,9 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Игра под давлением</title>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="4a4b9acd-3a90-4570-80c1-6168527479ba" data-domains="leodikadyrov.github.io"></script>
 <!-- Тест-вход v0, 07.10.2026. Источник: 01-praktika/instrumenty/test-vhod-v0.md. Стиль — от trener.html. Ответы считаются в браузере и никуда не отправляются. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -196,8 +201,8 @@ footer{border-top:1px solid var(--line);padding-block:36px 56px;color:var(--mute
     <textarea id="sendText" class="sendtext" rows="8" readonly aria-label="Текст результата"></textarea>
     <div class="links">
       <button class="cta" id="copy" type="button">Скопировать результат</button>
-      <a class="alt" id="waLink" href="https://wa.me/79234159992" target="_blank" rel="noopener">WhatsApp с кратким текстом</a>
-      <a class="alt" href="https://t.me/puchar" target="_blank" rel="noopener">Открыть Telegram</a>
+      <a class="alt" id="waLink" data-umami-event="contact" data-umami-event-channel="wa" data-umami-event-page="test-result" href="https://wa.me/79234159992" target="_blank" rel="noopener">WhatsApp с кратким текстом</a>
+      <a class="alt" data-umami-event="contact" data-umami-event-channel="tg" data-umami-event-page="test-result" href="https://t.me/puchar" target="_blank" rel="noopener">Открыть Telegram</a>
       <button class="ghost" id="copyMail" type="button">Скопировать адрес почты</button>
       <span class="msg ok" id="copyMsg" role="status"></span>
     </div>
@@ -235,8 +240,8 @@ footer{border-top:1px solid var(--line);padding-block:36px 56px;color:var(--mute
       <div><span>дальше</span>если захочешь, стартовый разбор: 1 500 ₽ · 8 000 ₸ · $25 за встречу</div>
     </div>
     <div class="links">
-      <a class="cta" href="https://t.me/puchar">Написать в Telegram</a>
-      <a class="alt" href="https://wa.me/79234159992">или WhatsApp</a>
+      <a class="cta" data-umami-event="contact" data-umami-event-channel="tg" data-umami-event-page="test-bottom" href="https://t.me/puchar">Написать в Telegram</a>
+      <a class="alt" data-umami-event="contact" data-umami-event-channel="wa" data-umami-event-page="test-bottom" href="https://wa.me/79234159992">или WhatsApp</a>
     </div>
     <p class="note" style="margin-top:14px">Telegram: <b>@puchar</b> · WhatsApp: <b>+7 923 415-99-92</b></p>
   </div>
@@ -249,6 +254,8 @@ footer{border-top:1px solid var(--line);padding-block:36px 56px;color:var(--mute
 </div></footer>
 
 <script>
+function track(n){try{window.umami&&umami.track(n)}catch(e){}}
+let startedSent=false;
 const LIK=["никогда","редко","иногда","часто","почти всегда"];
 const SCALES=[
  {id:"chase",name:"Отыграться",sub:"после неудачи игра ускоряется",
@@ -373,7 +380,7 @@ function render(data,live,left=0){
   $("#deep").innerHTML=top.length?`<h3>Две главные шкалы</h3>`+top.map(({sc,v})=>`<div class="card"><h3>${sc.name} · ${v} / 16</h3><dl><dt>В матче</dt><dd>${esc(sc.look)}</dd><dt>Проверь сам</dt><dd>${esc(sc.check)}</dd><dt>На неделю</dt><dd>${esc(sc.drill)}</dd></dl></div>`).join("")
    :`<p class="calm">Ни одна шкала не выше пяти. По твоим ответам давление на игру почти не влияет. Это стоит сверить с записью: что мы думаем о себе и как играем, не всегда совпадает.</p>`;
 }
-function copyResult(){const ta=$("#sendText"),m=$("#copyMsg");
+function copyResult(){track("test-copy");const ta=$("#sendText"),m=$("#copyMsg");
   const done=()=>{m.textContent="Скопировано. Вставь в чат.";};
   const fallback=()=>{ta.focus();ta.select();try{document.execCommand("copy")?done():(m.textContent="Выдели текст и скопируй вручную.");}catch(e){m.textContent="Выдели текст и скопируй вручную.";}};
   try{navigator.clipboard.writeText(ta.value).then(done,fallback);}catch(e){fallback();}}
@@ -390,9 +397,9 @@ function compute(){
   document.querySelectorAll(".sit").forEach(r=>{const c=r.querySelector("input:checked");r.classList.toggle("miss",!c);if(!c)miss.push(r);else vec[c.value]++;});
   if(miss.length){$("#msg").textContent=`Осталось ответить: ${miss.length}. Пропущенные подсвечены.`;miss[0].scrollIntoView({behavior:"smooth",block:"center"});return;}
   $("#msg").textContent="";SCALES.forEach(sc=>scores[sc.id]=scores[sc.id]||0);
-  render({scores,vec},true);$("#result").scrollIntoView({behavior:"smooth"});
+  track("test-result");render({scores,vec},true);$("#result").scrollIntoView({behavior:"smooth"});
 }
-document.addEventListener("change",e=>{if(e.target.matches("input[type=radio]")){e.target.closest(".item,.sit")?.classList.remove("miss");save();progress();refresh();if(answered()===TOTAL)$("#msg").textContent="";}});
+document.addEventListener("change",e=>{if(e.target.matches("input[type=radio]")){if(!startedSent){startedSent=true;track("test-start");}e.target.closest(".item,.sit")?.classList.remove("miss");save();progress();refresh();if(answered()===TOTAL)$("#msg").textContent="";}});
 $("#calc").addEventListener("click",compute);
 $("#copy").addEventListener("click",copyResult);
 $("#copyMail").addEventListener("click",()=>{const m=$("#copyMsg"),addr="din02winchester25@gmail.com";try{navigator.clipboard.writeText(addr).then(()=>{m.textContent="Адрес скопирован."},()=>{m.textContent="Адрес: "+addr+". Выдели и скопируй вручную."});}catch(e){m.textContent="Адрес: "+addr+". Выдели и скопируй вручную.";}});
