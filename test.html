@@ -1,0 +1,402 @@
+<title>Игра под давлением</title>
+<!-- Тест-вход v0, 07.10.2026. Источник: 01-praktika/instrumenty/test-vhod-v0.md. Стиль — от trener.html. Ответы считаются в браузере и никуда не отправляются. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500;700&display=swap&subset=cyrillic,latin">
+
+<style>
+/* layout: one reading column, questionnaire rows like a scoresheet, result as a scoreboard of six bars */
+:root{
+  --ground:#f1efea;--surface:#ffffff;--surface-2:#e7e4dd;--ink:#15181e;--ink-2:#3d434f;--muted:#6b7280;
+  --line:#d3cfc6;--accent:#a8641b;--accent-soft:#f0dcc0;--stop:#9c3a32;--stop-soft:#f2dcd9;--ok:#3d6b4a;
+  --f-display:"Oswald","Arial Narrow",Impact,sans-serif;
+  --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-mono:"JetBrains Mono","Cascadia Mono",Consolas,monospace;
+  --read:68ch;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#12151b;--surface:#1a1e26;--surface-2:#232833;--ink:#e8e6e1;--ink-2:#c2c4c9;
+    --muted:#868c99;--line:#2c313d;--accent:#d98a3c;--accent-soft:#3a2a17;--stop:#cf6a5f;--stop-soft:#33201e;--ok:#7fae8b;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12151b;--surface:#1a1e26;--surface-2:#232833;--ink:#e8e6e1;--ink-2:#c2c4c9;
+  --muted:#868c99;--line:#2c313d;--accent:#d98a3c;--accent-soft:#3a2a17;--stop:#cf6a5f;--stop-soft:#33201e;--ok:#7fae8b;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-inline:24px}
+@media(max-width:600px){.wrap{padding-inline:16px}}
+section{padding-block:56px;border-top:1px solid var(--line)}
+h1,h2,h3{font-family:var(--f-display);text-transform:uppercase;text-wrap:balance}
+h1{font-size:clamp(2.2rem,6.5vw,4.2rem);line-height:.95;font-weight:600;margin:0 0 18px}
+h1 span{color:var(--accent);display:block}
+h2{font-size:clamp(1.5rem,3.2vw,2.1rem);line-height:1.05;font-weight:600;margin:0 0 10px}
+h3{font-size:1.1rem;font-weight:500;letter-spacing:.03em;margin:0 0 6px;line-height:1.2}
+p{margin:0 0 14px;max-width:var(--read)}
+a{color:var(--accent)}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;display:flex;align-items:center;gap:12px}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+.lede{font-size:1.18rem;color:var(--ink-2)}
+.note{font-size:.9rem;color:var(--muted)}
+.mono{font-family:var(--f-mono)}
+
+.hero{padding-block:56px 44px;border-top:0}
+.facts{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:22px;font-family:var(--f-mono);font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:500}
+
+/* progress */
+.progress{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);border-bottom:1px solid var(--line)}
+.progress .wrap{display:flex;align-items:center;gap:14px;padding-block:10px}
+.progress .rail{flex:1;height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.progress .rail i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.progress .count{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* likert */
+.legend{font-family:var(--f-mono);font-size:.74rem;color:var(--muted);letter-spacing:.04em;margin-bottom:18px}
+.items{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.item{display:grid;grid-template-columns:2.2rem minmax(0,1fr);gap:4px 10px;padding-block:16px;border-bottom:1px solid var(--line)}
+.item .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);padding-top:3px;font-variant-numeric:tabular-nums}
+.item .q{font-size:1.02rem;line-height:1.45}
+.opts{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opt span{display:inline-block;font-family:var(--f-mono);font-size:.76rem;letter-spacing:.02em;padding:7px 11px;border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink-2);transition:.12s;user-select:none}
+.opt input:hover+span{border-color:var(--accent)}
+.opt input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--ground)}
+.opt input:focus-visible+span{outline:2px solid var(--ink);outline-offset:2px}
+.item.miss{background:linear-gradient(90deg,var(--stop-soft),transparent 70%)}
+
+/* situations */
+.sit{padding-block:18px;border-bottom:1px solid var(--line)}
+.sit .q{font-size:1.05rem;margin-bottom:10px}
+.sit .opts{grid-column:auto;flex-direction:column;align-items:stretch}
+.sit .opt span{display:block;font-family:var(--f-body);font-size:.98rem;padding:9px 14px}
+.sit.miss{background:linear-gradient(90deg,var(--stop-soft),transparent 70%)}
+
+.go{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:30px}
+.cta{appearance:none;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:12px;background:var(--accent);color:var(--ground);font-family:var(--f-display);font-size:1.08rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:15px 28px;border-radius:2px;text-decoration:none;transition:.16s}
+.cta:hover{transform:translateY(-2px)}
+.cta:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.ghost{appearance:none;background:none;border:0;border-bottom:1px solid var(--line);padding:0 0 2px;font-family:var(--f-mono);font-size:.8rem;letter-spacing:.05em;color:var(--muted);cursor:pointer}
+.ghost:hover{color:var(--ink);border-color:var(--accent)}
+.msg{font-family:var(--f-mono);font-size:.8rem;color:var(--stop)}
+
+/* result */
+.badge{display:inline-block;font-family:var(--f-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:2px;background:var(--surface-2);color:var(--muted);margin-bottom:14px}
+.badge.live{background:var(--accent-soft);color:var(--accent)}
+.board{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:8px 20px}
+.row{display:grid;grid-template-columns:9.5rem minmax(0,1fr) 3.4rem;gap:14px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+@media(max-width:560px){.row{grid-template-columns:minmax(0,1fr) 3.2rem}.row .bar{grid-column:1 / -1;order:3}}
+.row .name{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.03em;font-size:1rem}
+.row .name small{display:block;font-family:var(--f-mono);text-transform:none;letter-spacing:0;font-size:.7rem;color:var(--muted)}
+.bar{position:relative;height:10px;background:var(--surface-2);border-radius:2px}
+.bar i{position:absolute;inset:0 auto 0 0;border-radius:2px;background:var(--line);transition:width .4s}
+.bar.mid i{background:var(--ink-2)}
+.bar.hi i{background:var(--accent)}
+.bar::before,.bar::after{content:"";position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--muted);opacity:.45}
+.bar::before{left:37.5%}.bar::after{left:68.75%}
+.row .val{font-family:var(--f-mono);font-size:.82rem;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.scalekey{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:.7rem;color:var(--muted);margin:10px 0 0}
+
+.vector{margin-top:26px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+@media(max-width:560px){.vector{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.vec{border:1px solid var(--line);border-radius:2px;padding:10px;background:var(--surface);text-align:center}
+.vec b{display:block;font-family:var(--f-display);font-size:1.6rem;font-weight:500;font-variant-numeric:tabular-nums}
+.vec span{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.vec.top{border-color:var(--accent);background:var(--accent-soft)}
+.vec.top b{color:var(--accent)}
+
+.deep{display:flex;flex-direction:column;gap:18px;margin-top:30px}
+.card{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:2px;padding:20px 22px}
+.card dl{margin:12px 0 0;display:grid;grid-template-columns:8.5rem minmax(0,1fr);gap:10px 16px}
+@media(max-width:560px){.card dl{grid-template-columns:1fr;gap:2px}.card dd{margin-bottom:10px}}
+.card dt{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:4px}
+.card dd{margin:0;font-size:.98rem;line-height:1.5}
+.calm{color:var(--ink-2)}
+
+.route{background:var(--surface-2);border-radius:3px;padding:22px}
+.route p:last-child{margin-bottom:0}
+.phones{display:flex;flex-wrap:wrap;gap:10px 28px;margin:12px 0 14px;font-family:var(--f-mono);font-size:.9rem}
+.phones b{font-weight:700;font-variant-numeric:tabular-nums}
+
+.offer{border:1px solid var(--accent);border-radius:3px;padding:26px 24px;background:var(--surface)}
+.terms{display:flex;flex-direction:column;gap:6px;font-size:.96rem;color:var(--ink-2);margin:18px 0 22px}
+.terms span{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:8px}
+.links{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
+.alt{font-family:var(--f-mono);font-size:.82rem;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+
+.send{margin-top:34px;padding:22px;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+.sendtext{display:block;width:100%;margin:12px 0 16px;font-family:var(--f-mono);font-size:.8rem;line-height:1.5;padding:10px 12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:2px;resize:vertical}
+.msg.ok{color:var(--ok)}
+.research{margin-top:26px;padding-top:22px;border-top:1px dashed var(--line)}
+.chk{display:flex;gap:10px;align-items:flex-start;margin:12px 0;max-width:var(--read);cursor:pointer}
+.chk input{margin-top:5px;flex:none;width:18px;height:18px;accent-color:var(--accent)}
+.small{margin:0 0 16px;padding-left:18px;max-width:var(--read);font-size:.9rem;color:var(--ink-2)}
+.small li{margin-bottom:4px}
+footer{border-top:1px solid var(--line);padding-block:36px 56px;color:var(--muted);font-size:.86rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<section class="hero">
+  <p class="eyebrow">самотест · CS2 и другие соревновательные игры · 16+</p>
+  <h1>Как ты играешь <span>под давлением</span></h1>
+  <p class="lede">24 утверждения о твоих матчах и 5 игровых ситуаций. В конце — профиль по шести шкалам: что происходит с твоей игрой после проигранного раунда, в концовке, в войсе и в ранговой сессии. Для двух главных шкал — как проверить это в своей демке и одно упражнение на неделю.</p>
+  <div class="facts"><span><b>7</b> минут</span><span>без регистрации</span><span>ответы остаются в браузере, пока сам не отправишь</span><span>не диагноз</span></div>
+</section>
+</div>
+
+<div class="progress" aria-hidden="true"><div class="wrap"><div class="rail"><i id="bar"></i></div><span class="count" id="count">0 / 29</span></div></div>
+
+<div class="wrap">
+<section id="part1">
+  <p class="eyebrow">часть 1 · 24 утверждения</p>
+  <h2>За последний месяц матчей</h2>
+  <p>Отвечай, как было, а не как надо. Если утверждение не про твою игру, выбирай «никогда».</p>
+  <p class="legend">никогда · редко · иногда · часто · почти всегда</p>
+  <div class="items" id="items"></div>
+</section>
+
+<section id="part2">
+  <p class="eyebrow">часть 2 · 5 ситуаций</p>
+  <h2>Первая реакция</h2>
+  <p>Выбери вариант, который ближе к тому, что у тебя бывает на самом деле.</p>
+  <div id="sits"></div>
+  <div class="go">
+    <button class="cta" id="calc" type="button">Показать результат</button>
+    <button class="ghost" id="reset" type="button">Сбросить ответы</button>
+    <span class="msg" id="msg" role="status"></span>
+  </div>
+</section>
+
+<section id="result">
+  <p class="eyebrow">результат</p>
+  <span class="badge" id="badge">Пример. Ответь на все вопросы, и здесь будет твой</span>
+  <h2>Твой профиль</h2>
+  <p class="note">Шкала 0–16. Чем длиннее полоса, тем чаще это про тебя. Отметки — пороги 6 и 11. Норм нет: пороги выбраны вручную, тест не валидирован.</p>
+  <div class="board" id="board"></div>
+  <div class="scalekey"><span>0–5 · редко про тебя</span><span>6–10 · бывает</span><span>11–16 · похоже, это твоё</span></div>
+  <p id="swing" class="calm" style="margin-top:16px" hidden></p>
+
+  <h3 style="margin-top:34px">Куда уходит первая мысль</h3>
+  <p class="note">Сколько раз из пяти ситуаций выбран каждый вариант.</p>
+  <div class="vector" id="vector"></div>
+  <p id="vectorText" class="calm" style="margin-top:14px"></p>
+
+  <div class="deep" id="deep"></div>
+
+  <div class="send" id="send" hidden>
+    <h3>Отправить результат мне</h3>
+    <p class="note">Скопируй текст со всеми ответами и пришли мне в Telegram, WhatsApp или на почту <b class="mono">din02winchester25@gmail.com</b> вместе с демкой. Для почты скопируй результат и адрес и отправь письмо со своей почты. Скриншот не нужен. Пока ты сам ничего не отправил, ответы остаются в твоём браузере.</p>
+    <textarea id="sendText" class="sendtext" rows="8" readonly aria-label="Текст результата"></textarea>
+    <div class="links">
+      <button class="cta" id="copy" type="button">Скопировать результат</button>
+      <a class="alt" id="waLink" href="https://wa.me/79234159992" target="_blank" rel="noopener">WhatsApp с кратким текстом</a>
+      <a class="alt" href="https://t.me/puchar" target="_blank" rel="noopener">Открыть Telegram</a>
+      <button class="ghost" id="copyMail" type="button">Скопировать адрес почты</button>
+      <span class="msg ok" id="copyMsg" role="status"></span>
+    </div>
+    <div class="research" id="research">
+      <h3>Для исследования (по желанию)</h3>
+      <p class="note">Тест авторский и пока не проверен. Если разрешишь, твои ответы войдут в выборку, на которой его проверят. На твой разбор это не влияет.</p>
+      <label class="chk" for="consent"><input type="checkbox" id="consent"><span>Мне 18 лет или больше. Я разрешаю использовать мои ответы в исследовании, без имени и контактов.</span></label>
+      <ul class="small">
+        <li>Отметишь, и в текст выше добавится строка о согласии. Не отметишь, и я использую ответы только для твоего разбора.</li>
+        <li>Контакт ты отправляешь мне сам, в исследование он не попадает.</li>
+        <li>Удалить ответы можно в любой момент: напиши мне.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="route">
+    <h3>Если это не только про игру</h3>
+    <p>Тест про то, что происходит в матче. Если настроение, сон или тревога держатся две недели и дольше и не только из-за игры, иди к психологу или врачу. Тренер такое не решает.</p>
+    <p>Если тяжело прямо сейчас, звони, это бесплатно и анонимно:</p>
+    <div class="phones"><span>Казахстан · <b>150</b></span><span>Экстренно · <b>112</b></span></div>
+  </div>
+</section>
+
+<section>
+  <div class="offer">
+    <p class="eyebrow">проверить по записи</p>
+    <h2>Совпадает ли это с демкой?</h2>
+    <p>Тест показывает, что ты думаешь о своей игре. Как ты играешь на самом деле, видно только в записи матча. Чаще всего самое полезное лежит как раз в разнице.</p>
+    <p>Пришли результат теста (кнопка «Скопировать результат» выше) и одну демку последнего матча. Я посмотрю запись по твоим двум главным шкалам и напишу, подтверждаются ли они.</p>
+    <div class="terms">
+      <div><span>цена</span>бесплатно, один раз на человека</div>
+      <div><span>срок</span>ответ в течение 3 дней</div>
+      <div><span>дальше</span>если захочешь, стартовый разбор: 1 500 ₽ · 8 000 ₸ · $25 за встречу</div>
+    </div>
+    <div class="links">
+      <a class="cta" href="https://t.me/puchar">Написать в Telegram</a>
+      <a class="alt" href="https://wa.me/79234159992">или WhatsApp</a>
+    </div>
+    <p class="note" style="margin-top:14px">Telegram: <b>@puchar</b> · WhatsApp: <b>+7 923 415-99-92</b></p>
+  </div>
+</section>
+</div>
+
+<footer><div class="wrap">
+  <p>Арыстан Кадыров, тренер по соревновательной подготовке. Не психолог и не врач: тест не ставит и не исключает диагнозы.</p>
+  <p>Утверждения и пороги — авторские, черновик v0 от 07.10.2026. Ответы считаются на твоём устройстве и никуда не отправляются, пока ты сам не нажмёшь кнопку отправки.</p>
+</div></footer>
+
+<script>
+const LIK=["никогда","редко","иногда","часто","почти всегда"];
+const SCALES=[
+ {id:"chase",name:"Отыграться",sub:"после неудачи игра ускоряется",
+  items:["После проигранного раунда я иду в дуэль, которую обычно не взял бы.","После своей ошибки хочу выиграть следующий раунд сам, в одиночку.","Когда команда проигрывает подряд, я начинаю форсить или пушить без информации.","После обидной смерти я играю быстрее, чем собирался."],
+  look:"После проигранного раунда ты первым лезешь в контакт и умираешь без размена.",
+  check:"Открой последнюю демку, отметь проигранные раунды и посмотри, как ты умер в следующем за каждым.",
+  drill:"Правило одного раунда: после проигранного раунда следующий играешь по плану команды и первым в дуэль не идёшь."},
+ {id:"freeze",name:"Зажим",sub:"после неудачи пассив или «гасну»",
+  items:["После ошибки я начинаю ждать и отдаю инициативу другим.","После нескольких проигранных раундов я гасну: играю вяло, как будто уже всё равно.","Я больше боюсь подвести команду, чем хочу выиграть раунд.","При плохом счёте я играю так, чтобы не умереть первым, а не чтобы выиграть раунд."],
+  look:"После ошибки ты стоишь на позиции и ждёшь, пока раунд решат за тебя. Или гаснешь и доигрываешь карту вполсилы.",
+  check:"Сравни, сколько урона ты наносишь, когда счёт в твою пользу, и когда он против.",
+  drill:"До начала раунда реши, где берёшь один контакт, и возьми его."},
+ {id:"stuck",name:"Застревание",sub:"прошлый раунд не отпускает",
+  items:["В следующем раунде я ещё думаю о прошлом.","После матча я долго прокручиваю один-два момента.","Одна грубая ошибка в начале портит мне всю карту.","Проигранный матч не отпускает меня больше часа."],
+  look:"Раунд закончился, а ты ещё в нём, и следующий играешь вполсилы.",
+  check:"Найди свою самую глупую смерть в последней демке и посмотри два раунда после неё.",
+  drill:"В фризтайм одна фраза: «было — делаю», потом длинный выдох. После матча запиши один момент в две строки и закрой."},
+ {id:"clutch",name:"Концовка",sub:"равный счёт, клатч, решающая игра",
+  items:["В концовке при равном счёте я думаю о результате, а не о раунде.","В концовке тело ведёт себя иначе: дрожит прицел, частит дыхание.","В решающем раунде я решаю слишком рано или меняю решение на ходу.","Важные матчи (турнир, игра за ранг) я играю хуже обычных."],
+  look:"При 11:11 ты думаешь о ранге, а не о том, что делать в этом раунде.",
+  check:"Сравни свой урон в последних шести раундах близкой игры и в остальных.",
+  drill:"В концовке у тебя одна и та же процедура в фризтайм: выдох длиннее вдоха и задача раунда вслух."},
+ {id:"comms",name:"Связь",sub:"войс и команда при плохом счёте",
+  items:["Когда счёт не в нашу пользу, я замолкаю в войсе.","Я срываюсь на тиммейтов — в войсе или в чате.","Ошибка тиммейта выбивает меня сильнее, чем своя.","Когда кто-то в команде токсит, моя игра становится хуже."],
+  look:"При плохом счёте ты замолкаешь или срываешься, и команда остаётся без информации.",
+  check:"Включи запись с войсом на проигранной серии раундов и послушай, что ты говоришь.",
+  drill:"В проигрышные раунды говоришь только факты: сколько, где, сколько HP."},
+ {id:"rank",name:"Ранг",sub:"сессия живёт по эло",
+  items:["Настроение после сессии зависит от того, сколько эло я набрал или потерял.","После проигрыша я запускаю ещё одну игру, чтобы отыграть рейтинг.","Я заканчиваю сессию после серии поражений, а не когда планировал.","Если бы ранг скрыли на месяц, мне стало бы неинтересно играть."],
+  look:"Вечер зависит от эло. После поражения ты запускаешь ещё одну, чтобы отыграться.",
+  check:"Открой историю матчей: сколько игр ты сыграл после двух поражений подряд и чем они кончились.",
+  drill:"План сессии до старта: число игр. И стоп-правило: два поражения подряд — пауза 10 минут."}
+];
+const VEC={self:"на себя",other:"на других",luck:"на случай",review:"на разбор",flat:"ровно"};
+const VEC_TXT={
+ self:{what:"про то, какой ты плохой",so:"Это съедает внимание к следующему раунду. Полезнее сменить вопрос: не «какой я», а «что именно я сделал»."},
+ other:{what:"про других: тиммейтов, соперника, матчмейкинг",so:"Так легче, но то, что в твоих руках, остаётся неразобранным."},
+ luck:{what:"про везение",so:"Иногда так и есть, но, если это ответ по умолчанию, разбирать становится нечего."},
+ review:{what:"про разбор: что произошло и почему",so:"Это рабочий вариант. Проверь только, что разбор не превращается в прокручивание (шкала «Застревание»)."},
+ flat:{what:"«ровно»: проехали, бывает",so:"Проверь, правда ли отпускает или ты это глушишь. Признак второго: злость или ступор через два-три раунда."}
+};
+function vectorText(vec){
+  const mx=Math.max(...Object.values(vec));
+  if(mx===0)return "";
+  const tops=Object.keys(VEC).filter(k=>vec[k]===mx);
+  if(mx===1)return "Первая мысль от ситуации к ситуации разная, одного привычного направления по этим пяти ситуациям не видно.";
+  if(tops.length===1){const t=VEC_TXT[tops[0]];return `Первая мысль чаще ${t.what}. ${t.so}`;}
+  const [a,b]=tops.map(k=>VEC_TXT[k]);
+  return `Первая мысль поровну уходит в две стороны: ${a.what} и ${b.what}. ${a.so} ${b.so}`;
+}
+const SITS=[
+ {q:"Вели всю карту и проиграли 11:13. Первая мысль:",o:[["Это я слил концовку","self"],["С такими тиммейтами не выиграть","other"],["Не повезло, бывает рандом","luck"],["Какой раунд мы отдали и почему?","review"],["Проехали, следующая","flat"]]},
+ {q:"Тебя убили из угла, который ты не проверил:",o:[["Как можно было так тупо","self"],["Опять кемпер в углу","other"],["Он просто угадал","luck"],["Почему я его пропустил: спешил или не знал позицию?","review"],["Бывает","flat"]]},
+ {q:"Тиммейт ушёл в соло-пик и умер, раунд проигран:",o:[["Надо было мне его прикрыть","self"],["Пишу ему, что он сделал","other"],["Не повезло с пиком","luck"],["Что в нашем плане оставило его одного?","review"],["Ничего не чувствую, следующий раунд","flat"]]},
+ {q:"Тренер или сильный игрок говорит, что ты плохо решил, а ты уверен, что хорошо:",o:[["Начинаю сомневаться в себе","self"],["Раздражаюсь: он не понял моё решение","other"],["Смотрю демку и проверяю, кто прав","review"],["Соглашаюсь, чтобы не спорить","flat"]]},
+ {q:"Проиграл пять матчей подряд:",o:[["Со мной что-то не так, я стал хуже","self"],["Матчмейкинг кидает мне слабых тиммейтов","other"],["Скоро повезёт","luck"],["Смотрю, что повторяется в этих пяти","review"],["Делаю паузу","flat"]]}
+];
+const EXAMPLE={scores:{chase:12,freeze:5,stuck:10,clutch:13,comms:7,rank:9},vec:{self:2,other:1,luck:0,review:1,flat:1}};
+const TOTAL=SCALES.length*4+SITS.length;
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let n=0,html="";
+SCALES.forEach((sc,si)=>sc.items.forEach((t,k)=>{
+  n++;const name=`q${n}`;
+  html+=`<div class="item" id="row-${name}" data-scale="${sc.id}"><span class="n">${String(n).padStart(2,"0")}</span><span class="q">${esc(t)}</span><div class="opts" role="radiogroup" aria-label="${esc(t)}">`+
+   LIK.map((l,v)=>`<label class="opt"><input type="radio" id="${name}-${v}" name="${name}" value="${v}"><span>${l}</span></label>`).join("")+`</div></div>`;
+}));
+$("#items").innerHTML=html;
+// interleave order is fixed by scale; shuffle display order so scales are not obvious
+(function(){const box=$("#items");const rows=[...box.children];const order=[0,4,8,12,16,20,1,5,9,13,17,21,2,6,10,14,18,22,3,7,11,15,19,23];
+ order.forEach((idx,pos)=>{const r=rows[idx];r.querySelector(".n").textContent=String(pos+1).padStart(2,"0");box.appendChild(r);});})();
+
+$("#sits").innerHTML=SITS.map((s,i)=>`<div class="sit" id="row-s${i}"><p class="q"><span class="mono note">${i+1}.</span> ${esc(s.q)}</p><div class="opts" role="radiogroup" aria-label="${esc(s.q)}">`+
+ s.o.map(([t,v],j)=>`<label class="opt"><input type="radio" id="s${i}-${j}" name="s${i}" value="${v}"><span>${esc(t)}</span></label>`).join("")+`</div></div>`).join("");
+
+const NL=String.fromCharCode(10);
+let LAST=null;
+function ansOf(si,k){const c=document.querySelector(`input[name="q${si*4+k+1}"]:checked`);return c?+c.value:null}
+function resultText(scores,vec,top,consent,full){
+  const L=["Тест «Игра под давлением»"];
+  SCALES.forEach((sc,si)=>{
+    if(full){L.push("",`${sc.name}: ${scores[sc.id]}/16`);sc.items.forEach((t,k)=>L.push(`  ${LIK[ansOf(si,k)]}: ${t}`));}
+    else L.push(`${sc.name}: ${scores[sc.id]}/16 [${sc.items.map((_,k)=>ansOf(si,k)).join(",")}]`);
+  });
+  if(full){L.push("","Ситуации:");SITS.forEach((q,i)=>{const c=document.querySelector(`input[name="s${i}"]:checked`);const o=q.o.find(x=>x[1]===c.value);L.push(`  ${i+1}. ${q.q} ${o[0]}`);});}
+  else{L.push("Шкала ответов: 0 никогда, 1 редко, 2 иногда, 3 часто, 4 почти всегда");L.push("Ситуации: "+SITS.map((q,i)=>VEC[document.querySelector(`input[name="s${i}"]:checked`).value]).join(", "));}
+  L.push("","Первая мысль: "+Object.keys(VEC).map(k=>`${VEC[k]} ${vec[k]}`).join(", "));
+  L.push("Главные шкалы: "+(top.length?top.map(t=>t.sc.name).join(", "):"нет выше 5"));
+  if(consent)L.push("","Согласие на исследование: да. Мне 18 лет или больше. Ответы можно использовать без имени и контактов.");
+  return L.join(NL);}
+function buildSend(){
+  if(!LAST)return;
+  const c=$("#consent").checked,{scores,vec,top}=LAST;
+  const full=resultText(scores,vec,top,c,true),short=resultText(scores,vec,top,c,false);
+  $("#sendText").value=full;
+  $("#waLink").href="https://wa.me/79234159992?text="+encodeURIComponent(short);
+}
+const KEY="pressure-test-v0";
+function save(){try{const a={};document.querySelectorAll("input[type=radio]:checked").forEach(i=>a[i.name]=i.value);localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}}
+function load(){try{const a=JSON.parse(localStorage.getItem(KEY)||"{}");Object.entries(a).forEach(([k,v])=>{const el=document.querySelector(`input[name="${k}"][value="${v}"]`);if(el)el.checked=true;});}catch(e){}}
+function answered(){return new Set([...document.querySelectorAll("input[type=radio]:checked")].map(i=>i.name)).size}
+function progress(){const a=answered();$("#count").textContent=`${a} / ${TOTAL}`;$("#bar").style.width=(a/TOTAL*100)+"%";}
+
+function band(v){return v>=11?"hi":v>=6?"mid":"lo"}
+function render(data,live,left=0){
+  const {scores,vec}=data;
+  $("#badge").textContent=!live?"Пример. Ответь на все вопросы, и здесь будет твой":left>0?`Предварительно · осталось ответить: ${left}`:"Твой результат";
+  $("#badge").className="badge"+(live&&left===0?" live":"");
+  $("#board").innerHTML=SCALES.map(sc=>{const v=scores[sc.id];return `<div class="row"><span class="name">${sc.name}<small>${sc.sub}</small></span><div class="bar ${band(v)}"><i style="width:${v/16*100}%"></i></div><span class="val">${v} / 16</span></div>`}).join("");
+  const sw=$("#swing");
+  if(left===0&&scores.chase>=11&&scores.freeze>=11){sw.hidden=false;sw.textContent="«Отыграться» и «Зажим» высоко обе. После неудачи твою игру качает в обе стороны: то лезешь, то прячешься. Это одна реакция на неудачу, а не две разные проблемы.";}else sw.hidden=true;
+  const mx=Math.max(...Object.values(vec));
+  $("#vector").innerHTML=Object.keys(VEC).map(k=>`<div class="vec${vec[k]===mx&&mx>0?" top":""}"><b>${vec[k]}</b><span>${VEC[k]}</span></div>`).join("");
+  const tops=Object.keys(VEC).filter(k=>vec[k]===mx&&mx>0);
+  $("#vectorText").textContent=vectorText(vec);
+  const ranked=SCALES.map(sc=>({sc,v:scores[sc.id]})).sort((a,b)=>b.v-a.v);
+  const top=ranked.filter(r=>r.v>=6).slice(0,2);
+  const done=live&&left===0;$("#send").hidden=!done;
+  if(done){LAST={scores,vec,top};buildSend();}
+  if(left>0){$("#deep").innerHTML=`<p class="calm">Две главные шкалы и что с ними делать появятся, когда ответишь на все вопросы. Полосы выше пока считаются только по тому, что уже отмечено.</p>`;return;}
+  $("#deep").innerHTML=top.length?`<h3>Две главные шкалы</h3>`+top.map(({sc,v})=>`<div class="card"><h3>${sc.name} · ${v} / 16</h3><dl><dt>В матче</dt><dd>${esc(sc.look)}</dd><dt>Проверь сам</dt><dd>${esc(sc.check)}</dd><dt>На неделю</dt><dd>${esc(sc.drill)}</dd></dl></div>`).join("")
+   :`<p class="calm">Ни одна шкала не выше пяти. По твоим ответам давление на игру почти не влияет. Это стоит сверить с записью: что мы думаем о себе и как играем, не всегда совпадает.</p>`;
+}
+function copyResult(){const ta=$("#sendText"),m=$("#copyMsg");
+  const done=()=>{m.textContent="Скопировано. Вставь в чат.";};
+  const fallback=()=>{ta.focus();ta.select();try{document.execCommand("copy")?done():(m.textContent="Выдели текст и скопируй вручную.");}catch(e){m.textContent="Выдели текст и скопируй вручную.";}};
+  try{navigator.clipboard.writeText(ta.value).then(done,fallback);}catch(e){fallback();}}
+function collect(){
+  const scores={},vec={self:0,other:0,luck:0,review:0,flat:0};SCALES.forEach(sc=>scores[sc.id]=0);
+  document.querySelectorAll(".item").forEach(r=>{const c=r.querySelector("input:checked");if(c)scores[r.dataset.scale]+= +c.value;});
+  document.querySelectorAll(".sit").forEach(r=>{const c=r.querySelector("input:checked");if(c)vec[c.value]++;});
+  return {scores,vec};
+}
+function refresh(){const a=answered();if(a===0){render(EXAMPLE,false);return;}render(collect(),true,TOTAL-a);}
+function compute(){
+  const scores={},vec={self:0,other:0,luck:0,review:0,flat:0};let miss=[];
+  document.querySelectorAll(".item").forEach(r=>{const c=r.querySelector("input:checked");r.classList.toggle("miss",!c);if(!c)miss.push(r);else scores[r.dataset.scale]=(scores[r.dataset.scale]||0)+ +c.value;});
+  document.querySelectorAll(".sit").forEach(r=>{const c=r.querySelector("input:checked");r.classList.toggle("miss",!c);if(!c)miss.push(r);else vec[c.value]++;});
+  if(miss.length){$("#msg").textContent=`Осталось ответить: ${miss.length}. Пропущенные подсвечены.`;miss[0].scrollIntoView({behavior:"smooth",block:"center"});return;}
+  $("#msg").textContent="";SCALES.forEach(sc=>scores[sc.id]=scores[sc.id]||0);
+  render({scores,vec},true);$("#result").scrollIntoView({behavior:"smooth"});
+}
+document.addEventListener("change",e=>{if(e.target.matches("input[type=radio]")){e.target.closest(".item,.sit")?.classList.remove("miss");save();progress();refresh();if(answered()===TOTAL)$("#msg").textContent="";}});
+$("#calc").addEventListener("click",compute);
+$("#copy").addEventListener("click",copyResult);
+$("#copyMail").addEventListener("click",()=>{const m=$("#copyMsg"),addr="din02winchester25@gmail.com";try{navigator.clipboard.writeText(addr).then(()=>{m.textContent="Адрес скопирован."},()=>{m.textContent="Адрес: "+addr+". Выдели и скопируй вручную."});}catch(e){m.textContent="Адрес: "+addr+". Выдели и скопируй вручную.";}});
+$("#consent").addEventListener("change",buildSend);
+$("#reset").addEventListener("click",()=>{document.querySelectorAll("input:checked").forEach(i=>i.checked=false);try{localStorage.removeItem(KEY)}catch(e){}document.querySelectorAll(".miss").forEach(r=>r.classList.remove("miss"));$("#msg").textContent="";progress();render(EXAMPLE,false);});
+load();progress();refresh();
+</script>
